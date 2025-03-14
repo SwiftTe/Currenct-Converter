@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        input, select, button { margin: 10px; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Currency Converter</h1>
+    <label>Amount: <input type="number" id="amount" value="1"></label>
+    <br>
+    <label>From: <select id="fromCurrency"></select></label>
+    <label>To: <select id="toCurrency"></select></label>
+    <br>
+    <button onclick="convert()">Convert</button>
+    <h2 id="result"></h2>
+
+    <script>
+        async function fetchRates() {
+            const response = await fetch('/api/rates');
+            const rates = await response.json();
+            const currencySelects = [document.getElementById('fromCurrency'), document.getElementById('toCurrency')];
+            Object.keys(rates).forEach(currency => {
+                currencySelects.forEach(select => {
+                    const option = document.createElement('option');
+                    option.value = currency;
+                    option.textContent = currency;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        async function convert() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const from = document.getElementById('fromCurrency').value;
+            const to = document.getElementById('toCurrency').value;
+            const response = await fetch('/api/rates');
+            const rates = await response.json();
+            if (rates[from] && rates[to]) {
+                const converted = (amount / rates[from]) * rates[to];
+                document.getElementById('result').textContent = `${amount} ${from} = ${converted.toFixed(2)} ${to}`;
+            } else {
+                document.getElementById('result').textContent = "Conversion failed!";
+            }
+        }
+
+        fetchRates();
+    </script>
+</body>
+</html>
